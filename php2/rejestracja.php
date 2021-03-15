@@ -10,11 +10,27 @@ if (isset($_POST['email']))
     //Sprawdź poprawność nickname
     $nick = $_POST['nick'];
 
-    // Sprawdzenei długości nicka
+    // Sprawdzenie długości nicka
     if (strlen($nick)<3 || (strlen($nick)>20))
     {
         $wszystko_OK = false;
         $_SESSION['e_nick']="Nick musi posiadać od 3 do 20 znaków";
+    }
+
+    if (ctype_alnum($nick)==false)
+    {
+        $wszystko_OK=false;
+        $_SESSION['e_nick']="Nick może składać się tylko z liter i cyfr, bez polskich znaków";
+    }
+
+    //Sprawdz poprawność e-mail.
+    $email = $_POST['email'];
+    $emailB = filter_var($email, FILTER_SANITIZE_EMAIL);
+
+    if (filter_var($emailB, FILTER_VALIDATE_EMAIL)==false || $emailB!=$email)
+    {
+        $wszystko_OK = false;
+        $_SESSION['e_email']="Podaj poprawny adres e-mail";
     }
 
     if ($wszystko_OK==true)
@@ -65,6 +81,17 @@ if (isset($_POST['email']))
         ?>
 
         E-mail: <br /><input type="text" name="email" /><br />
+
+        <?php
+
+        if (isset($_SESSION['e_email']))
+        {
+            echo '<div class="error">'.$_SESSION['e_email'.'</div>';
+            unset($_SESSION['e_email']);
+        }
+
+        ?>
+
         Hasło: <br /><input type="password" name="password1" /><br />
         Powtórz hasło: <br /><input type="password" name="password2" /><br />
         <label>
