@@ -43,7 +43,7 @@ if (isset($_POST['email']))
         $_SESSION['e_haslo']="Hasło musi zawierać od 8 do 20 znaków";
     }
 
-    if ($password2!=$password2)
+    if ($password1!=$password2)
     {
         $wszystko_OK=false;
         $_SESSION['e_haslo']="Hasła muszą być identyczne";
@@ -51,14 +51,87 @@ if (isset($_POST['email']))
 
     $haslo_hash = password_hash($password1, PASSWORD_DEFAULT);
 
-    echo $_POST['regulamin'];exit();
+    //Czy regulamin jest zaakceptowany
 
-    if ($wszystko_OK==true)
+    if (!isset($_POST['regulamin']))
     {
-        //testy zaliczone, dodajemy gracza
-        echo "Udana walidacja";
-        exit();
+        $wszystko_OK=false;
+        $_SESSION['e_regulamin']="Potwierdź akceptację regulaminu";
     }
+
+    //Bot or not
+
+    $sekret = "6LeLPn8aAAAAAPkYVgrph57A1Vx7fvcc9sK4nHdk";
+
+    $sprawdz = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$sekret.'&response='.$_POST['g-recaptcha-response']);
+
+    $odpowiedz = json_decode($sprawdz);
+
+    if ($odpowiedz->success==false)
+    {
+        $wszystko_OK=false;
+        $_SESSION['e_bot']="Potwierdź że nie jesteś botem";
+    }
+
+    require_once "connect.php";
+    mysqli_report(MYSQLI_REPORT_STRICT);
+
+    try {
+        $connection = new mysqli($host, $db_user, $db_password, $db_name);
+        if($connection->connect_errno!=0)
+        {
+            throw new Exception(mysqli_connect_errno());
+        }
+        else
+        {
+            //czy email już istnieje?
+            $rezultat = $connection->query("SELECT id FROM uzytkownicy WHERE email='$email'");
+
+            if (!$rezultat) throw new Exception($connection->error);
+
+            $ile_takich_maili = $rezultat->num_rows;
+            if ($ile_takich_maili>0)
+            {
+                $wszystko_OK = false;
+                $_SESSION['e_email']="Taki e-mail już istnieje";
+            }
+
+            //Czy nick jest już zajęty
+            $rezultat = $connection->query("SELECT id FROM uzytkownicy WHERE user='$nick'");
+
+            if (!$rezultat) throw new Exception($connection->error);
+
+            $ile_takich_nickow = $rezultat->num_rows;
+            if ($ile_takich_nickow>0)
+            {
+                $wszystko_OK = false;
+                $_SESSION['e_nick']="Taki nick już istnieje";
+            }
+
+            if ($wszystko_OK==true)
+            {
+                //testy zaliczone, dodajemy gracza
+                if ($connection->query("INSERT INTO uzytkownicy VALUES (NULL,'$nick','$haslo_hash','$email',100,100,100,14)"))
+                {
+                    $_SESSION['udanarejestracja']=true;
+                    header('Location: witamy.php');
+                }else
+                {
+                    throw new Exception($connection->error);
+                }
+
+            }
+
+            $connection->close();
+        }
+
+    }
+    catch (Exception $e)
+    {
+        echo '<span style="color:red;">Błąd serwera! Przepraszamy za niedogodności</span>';
+        // echo '<br />Informacja developerska: '.$e;
+    }
+
 }
 
 ?>
@@ -126,7 +199,28 @@ if (isset($_POST['email']))
           <input type="checkbox" name="regulamin" /> Akceptuje regulamin
         </label>
 
+        <?php
+
+        if (isset($_SESSION['e_regulamin']))
+        {
+            echo '<div class="error">'.$_SESSION['e_regulamin'].'</div>';
+            unset($_SESSION['e_regulamin']);
+        }
+
+        ?>
+
         <div class="g-recaptcha" data-sitekey="6LeLPn8aAAAAALDjpvDB117Q44XHskvhH2ih0MJ2"></div>
+
+        <?php
+
+        if (isset($_SESSION['e_bot']))
+        {
+            echo '<div class="error">'.$_SESSION['e_bot'].'</div>';
+            unset($_SESSION['e_bot']);
+        }
+
+        ?>
+
         <br />
         <input type="submit" value="Zarejestruj się">
 
