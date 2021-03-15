@@ -33,13 +33,32 @@ if (isset($_POST['email']))
         $_SESSION['e_email']="Podaj poprawny adres e-mail";
     }
 
+    //Sprawdz poprawnosc hasła
+    $password1 = $_POST['password1'];
+    $password2 = $_POST['password2'];
+
+    if ((strlen($password1)<8) || (strlen($password1)>20))
+    {
+        $wszystko_OK=false;
+        $_SESSION['e_haslo']="Hasło musi zawierać od 8 do 20 znaków";
+    }
+
+    if ($password2!=$password2)
+    {
+        $wszystko_OK=false;
+        $_SESSION['e_haslo']="Hasła muszą być identyczne";
+    }
+
+    $haslo_hash = password_hash($password1, PASSWORD_DEFAULT);
+
+    echo $_POST['regulamin'];exit();
+
     if ($wszystko_OK==true)
     {
         //testy zaliczone, dodajemy gracza
         echo "Udana walidacja";
         exit();
     }
-
 }
 
 ?>
@@ -59,8 +78,6 @@ if (isset($_POST['email']))
             margin-top: 10px;
             margin-bottom: 10px;
         }
-
-
     </style>
 
 </head>
@@ -74,7 +91,7 @@ if (isset($_POST['email']))
 
         if (isset($_SESSION['e_nick']))
         {
-            echo '<div class="error">'.$_SESSION['e_nick'.'</div>';
+            echo '<div class="error">'.$_SESSION['e_nick'].'</div>';
             unset($_SESSION['e_nick']);
         }
 
@@ -86,13 +103,24 @@ if (isset($_POST['email']))
 
         if (isset($_SESSION['e_email']))
         {
-            echo '<div class="error">'.$_SESSION['e_email'.'</div>';
+            echo '<div class="error">'.$_SESSION['e_email'].'</div>';
             unset($_SESSION['e_email']);
         }
 
         ?>
 
         Hasło: <br /><input type="password" name="password1" /><br />
+
+        <?php
+
+        if (isset($_SESSION['e_haslo']))
+        {
+            echo '<div class="error">'.$_SESSION['e_haslo'].'</div>';
+            unset($_SESSION['e_haslo']);
+        }
+
+        ?>
+
         Powtórz hasło: <br /><input type="password" name="password2" /><br />
         <label>
           <input type="checkbox" name="regulamin" /> Akceptuje regulamin
