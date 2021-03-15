@@ -23,7 +23,7 @@ if (!isset($_SESSION['udanarejestracja']))
 <body>
     Dziękujemy za rejestrację w serwisie! Mozesz się zalogować na swoje konto.
 
-<a href="index.php.php">Zaloguj się na swoje konto!</a>
+<a href="index.php">Zaloguj się na swoje konto!</a>
 <br /><br />
 
 
