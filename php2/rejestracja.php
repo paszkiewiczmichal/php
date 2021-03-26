@@ -63,7 +63,10 @@ if (isset($_POST['email']))
 
     $sekret = "6LeLPn8aAAAAAPkYVgrph57A1Vx7fvcc9sK4nHdk";
 
-    $sprawdz = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$sekret.'&response='.$_POST['g-recaptcha-response']);
+    $sprawdz = file_get_contents
+    ('https://www.google.com/recaptcha/api/siteverify?secret='
+        .$sekret.'&response='
+        .$_POST['g-recaptcha-response']);
 
     $odpowiedz = json_decode($sprawdz);
 

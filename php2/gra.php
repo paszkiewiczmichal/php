@@ -30,7 +30,12 @@
     echo "<p> <b>E-mail </b>: ".$_SESSION['email'];
     echo "<br /><b>Dni premium </b>: ".$_SESSION['dnipremium']."<p>";
 
+    echo time()."<br />";
+    echo date('Y-m-d H:i:s')."<br />";
 
+    $dataczas = new DateTime();
+
+    echo $dataczas->format('Y-m-d H:i:s');
 
 ?>
 
